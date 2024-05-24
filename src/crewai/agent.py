@@ -327,7 +327,12 @@ class Agent(BaseModel):
                 self.response_template.split("{{ .Response }}")[1].strip()
             )
 
-        bind = self.llm.bind(stop=stop_words)
+        llm_deescriptions = str(self.llm)
+        llm_deescriptions = llm_deescriptions.lower()
+        if "bedrock" in llm_deescriptions:
+            bind = self.llm.bind()
+        else:
+            bind = self.llm.bind(stop_words=stop_words)
         inner_agent = agent_args | execution_prompt | bind | CrewAgentParser(agent=self)
         self.agent_executor = CrewAgentExecutor(
             agent=RunnableAgent(runnable=inner_agent), **executor_args
